@@ -1,0 +1,19 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+.canvas_container{
+    margin: 20px;
+    border: 1px solid;
+    border-color: red;
+}
+#colapse{
+    display:block;
+    margin: 0 auto;
+    color: black;
+    border-color: red;
+    background-color: white;
+    height: 30px;
+    width: 150px;
+    cursor: pointer;
+}
