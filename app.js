@@ -7,6 +7,9 @@ const ctx = canvas.getContext("2d");
 let allLines = [];
 let isTracked = false;
 
+let clearCounter = 0;
+const clearDivideCount = 60;
+
 class Point {
   constructor(x, y) {
     this.x = x;
@@ -23,10 +26,22 @@ class Line {
       x: (this.pointStart.x + this.pointEnd.x) / 2,
       y: (this.pointStart.y + this.pointEnd.y) / 2,
     };
+    this.clearVectorStart = null;
+    this.clearVectorEnd = null;
   }
 
   get getCenterCoord() {
     return this.centerPoint;
+  }
+
+  moveStartPointToCenter() {
+    this.pointStart.x = this.pointStart.x + this.clearVectorStart.x;
+    this.pointStart.y = this.pointStart.y + this.clearVectorStart.y;
+  }
+
+  moveEndPointToCenter() {
+    this.pointEnd.x = this.pointEnd.x + this.clearVectorEnd.x;
+    this.pointEnd.y = this.pointEnd.y + this.clearVectorEnd.y;
   }
 }
 
@@ -37,13 +52,65 @@ const currLine = {
 };
 
 colapseButton.onclick = function (event) {
-  allLines = [];
+  clearCounter = 0;
   currLine.pointStart = null;
   currLine.pointEnd = null;
   currLine.intersectDots = [];
   isTracked = false;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  calculateMovementVector();
+  window.requestAnimationFrame(colapseLines);
 };
+
+function colapseLines(timestamp) {
+  if (allLines.length == 0) return;
+
+  if (clearCounter < clearDivideCount) {
+    window.requestAnimationFrame(colapseLines);
+    clearCounter++;
+  } else {
+    allLines = [];
+    clearCounter = 0;
+    clearCanvas();
+    return;
+  }
+
+  allLines.forEach((line) => {
+    line.moveStartPointToCenter();
+    line.moveEndPointToCenter();
+  });
+  allLines.forEach((line) => {
+    setIntersectionsForLine(line);
+  });
+
+  clearCanvas();
+  drawLines();
+  drawCircles();
+}
+
+function calculateMovementVector() {
+  const t = clearDivideCount;
+  allLines.forEach((line) => {
+    line.clearVectorStart = getMovementVector(
+      line.pointStart.x,
+      line.centerPoint.x,
+      line.pointStart.y,
+      line.centerPoint.y,
+      t
+    );
+
+    line.clearVectorEnd = getMovementVector(
+      line.pointEnd.x,
+      line.centerPoint.x,
+      line.pointEnd.y,
+      line.centerPoint.y,
+      t
+    );
+  });
+}
+
+function getMovementVector(x1, x2, y1, y2, t) {
+  return new Point(+((x2 - x1) / t).toFixed(1), +((y2 - y1) / t).toFixed(1));
+}
 
 canvas.addEventListener(
   "contextmenu",
@@ -73,7 +140,7 @@ canvas.onmousemove = function (e) {
   if (!isTracked) return;
   let intersectionCoords = getIntersections(e);
   currLine.intersectDots = intersectionCoords;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  clearCanvas();
   drawLines();
   drawCircles();
   drawCurrentLine(e);
@@ -83,10 +150,16 @@ canvas.onmousemove = function (e) {
 function leftClick(event) {
   if (!isTracked) {
     isTracked = true;
-    currLine.pointStart = new Point(event.offsetX, event.offsetY);
+    currLine.pointStart = new Point(
+      Math.round(event.offsetX),
+      Math.round(event.offsetY)
+    );
   } else {
     isTracked = false;
-    currLine.pointEnd = new Point(event.offsetX, event.offsetY);
+    currLine.pointEnd = new Point(
+      Math.round(event.offsetX),
+      Math.round(event.offsetY)
+    );
     allLines.push(
       new Line(currLine.pointStart, currLine.pointEnd, currLine.intersectDots)
     );
@@ -97,7 +170,7 @@ function rightClick(event) {
   isTracked = false;
   currLine.pointStart = null;
   currLine.pointEnd = null;
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  clearCanvas();
   drawLines();
   drawCircles();
 }
@@ -141,6 +214,23 @@ function drawCircle(x, y) {
   ctx.fill();
 }
 
+function setIntersectionsForLine(line) {
+  let intersectDots = [];
+  allLines.forEach((item) => {
+    let coord = lineSegmentsIntercept(
+      line.pointStart,
+      line.pointEnd,
+      item.pointStart,
+      item.pointEnd
+    );
+
+    if (coord) {
+      intersectDots.push(coord);
+    }
+  });
+  line.intersectDots = intersectDots;
+}
+
 function getIntersections(e) {
   let intersectDots = [];
   allLines.forEach((item) => {
@@ -156,6 +246,10 @@ function getIntersections(e) {
     }
   });
   return intersectDots;
+}
+
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 }
 
 // point object: {x:, y:}
