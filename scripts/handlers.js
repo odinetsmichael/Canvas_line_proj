@@ -11,7 +11,7 @@ canvas.addEventListener(
   false
 );
 
-colapseButton.onclick = function (event) {
+colapseButton.onclick = function () {
   clearCounter = 0;
   currLine.pointStart = null;
   currLine.pointEnd = null;
@@ -66,7 +66,7 @@ function leftClick(event) {
   }
 }
 
-function rightClick(event) {
+function rightClick() {
   isTracked = false;
   currLine.pointStart = null;
   currLine.pointEnd = null;

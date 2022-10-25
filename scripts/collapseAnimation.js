@@ -1,7 +1,7 @@
 let clearCounter = 0;
 const clearDivideCount = 60;
 
-function colapseLines(timestamp) {
+function colapseLines() {
   if (allLines.length == 0) return;
 
   if (clearCounter < clearDivideCount) {
