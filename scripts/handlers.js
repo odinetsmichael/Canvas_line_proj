@@ -1,6 +1,6 @@
 const leftMouse = 1;
 const rightMouse = 3;
-const colapseButton = document.getElementById("colapse");
+const collapseButton = document.getElementById("collapse");
 
 canvas.addEventListener(
   "contextmenu",
@@ -11,14 +11,14 @@ canvas.addEventListener(
   false
 );
 
-colapseButton.onclick = function () {
+collapseButton.onclick = function () {
   clearCounter = 0;
   currLine.pointStart = null;
   currLine.pointEnd = null;
   currLine.intersectDots = [];
   isTracked = false;
   calculateMovementVector();
-  window.requestAnimationFrame(colapseLines);
+  window.requestAnimationFrame(collapseLines);
 };
 
 canvas.onmousedown = function (event) {

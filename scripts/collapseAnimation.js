@@ -1,11 +1,11 @@
 let clearCounter = 0;
 const clearDivideCount = 60;
 
-function colapseLines() {
+function collapseLines() {
   if (allLines.length == 0) return;
 
   if (clearCounter < clearDivideCount) {
-    window.requestAnimationFrame(colapseLines);
+    window.requestAnimationFrame(collapseLines);
     clearCounter++;
   } else {
     allLines = [];
